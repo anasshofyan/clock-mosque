@@ -5,6 +5,11 @@ export interface MosqueData {
   about: string;
   liveStreamUrl?: string;
   liveStream?: LiveStreamSettings;
+  prayerSchedules?: Array<{
+    prayer: string;
+    muadzin: string;
+    imam: string;
+  }>;
 }
 
 export interface KajianData {

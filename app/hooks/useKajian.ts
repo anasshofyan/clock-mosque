@@ -7,10 +7,17 @@ import { getConfigService } from '../services/ConfigService';
 export function useKajian() {
   const [announcements, setAnnouncements] = useState<KajianData[]>([]);
 
-  const loadAnnouncements = async () => {
+  const loadAnnouncements = async (forceRefresh = false) => {
     try {
       const config = await getConfigService();
+
+      // Force refresh dari API jika diminta
+      if (forceRefresh) {
+        await config.refreshConfigFromAPI();
+      }
+
       const activeAnnouncements = await config.getAnnouncements();
+      console.log('Loading announcements:', activeAnnouncements);
       setAnnouncements(activeAnnouncements);
     } catch (error) {
       console.error('Error loading announcements:', error);

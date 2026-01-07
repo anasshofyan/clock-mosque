@@ -212,6 +212,38 @@ class ConfigService {
     };
   }
 
+  public async refreshConfigFromAPI(): Promise<MosqueConfig> {
+    try {
+      // Force fetch dari API dengan bypass cache
+      const response = await fetch('/api/config', {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch config from API');
+      }
+
+      const config = await response.json();
+
+      // Update localStorage dengan data terbaru
+      if (typeof window !== 'undefined') {
+        storage.setItem(this.MOSQUE_KEY, JSON.stringify(config.mosque));
+        storage.setItem(this.KAJIAN_KEY, JSON.stringify(config.settings.announcements));
+      }
+
+      console.log('Config refreshed from API:', config);
+      return config;
+    } catch (error) {
+      console.error('Error refreshing config from API:', error);
+      // Fallback ke config yang ada di localStorage
+      return this.getConfig();
+    }
+  }
+
   public async getMosqueInfo(): Promise<MosqueData> {
     const config = await this.getConfig();
     return config.mosque;
@@ -219,7 +251,8 @@ class ConfigService {
 
   public async getAnnouncements() {
     const config = await this.getConfig();
-    return config.settings.announcements;
+    // Hanya return kajian yang aktif
+    return config.settings.announcements.filter(a => a.isActive);
   }
 
   public async getAllAnnouncements() {

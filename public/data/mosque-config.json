@@ -1,14 +1,14 @@
 {
   "mosque": {
-    "name": "Masjid AL-Hidayah yaaaaa",
+    "name": "Masjid AL-Hidayah yaaaaasdsdfad",
     "location": "Selatpanjangssas",
-    "cityCode": "0405",
+    "cityCode": "1610",
     "liveStream": {
       "title": "Masjidil Haram",
       "description": "Live from Makkah",
       "autoplay": true,
-      "muted": true,
-      "url": "https://www.youtube.com/embed/2Gub8-cSH9c"
+      "muted": false,
+      "url": "https://www.youtube.com/embed/KPVNTr6Cqtw"
     },
     "prayerSchedules": [
       {
@@ -80,6 +80,14 @@
         "schedule": "Est quam est possimu",
         "isActive": false,
         "id": "1745018986458"
+      },
+      {
+        "text": "kajian ",
+        "description": "kdksjdk",
+        "ustadz": "skjf",
+        "schedule": "ddfg",
+        "isActive": true,
+        "id": "1767798960789"
       }
     ],
     "prayerTimeAdjustments": {

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { storage } from "../utils/storage";
 import { VERSION_INFO } from "../version";
+import { storage } from "../utils/storage";
 
 interface VersionInfo {
   version: string;
