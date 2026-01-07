@@ -1,7 +1,7 @@
 {
   "mosque": {
-    "name": "Masjid AL-Hidayah",
-    "location": "Selatpanjang",
+    "name": "Masjid AL-Hidayah yaaaaa",
+    "location": "Selatpanjangssas",
     "cityCode": "0405",
     "liveStream": {
       "title": "Masjidil Haram",
@@ -47,7 +47,7 @@
         "description": "Kajian Kitab Riyadhus Shalihin - Bab Keutamaan Sabar",
         "ustadz": "Ustadz Ahmad Firdaus",
         "schedule": "Setiap Senin Ba'da Magrib",
-        "isActive": true
+        "isActive": false
       },
       {
         "id": 2,

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { VERSION_INFO } from '../version';
-import { storage } from '../utils/storage';
+import { useState, useEffect } from "react";
+import { storage } from "../utils/storage";
+import { VERSION_INFO } from "../version";
 
 interface VersionInfo {
   version: string;
@@ -31,42 +31,44 @@ export function useVersionCheck(): VersionCheckResult {
   const checkForUpdates = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const response = await fetch('/api/version', {
-        cache: 'no-cache',
+      const response = await fetch("/api/version", {
+        cache: "no-cache",
         headers: {
-          'Cache-Control': 'no-cache'
-        }
+          "Cache-Control": "no-cache",
+        },
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to check for updates');
+        throw new Error("Failed to check for updates");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.version) {
         setLatestVersion(data.version);
-        
+
         // Compare versions
-        const isNewerVersion = (
+        const isNewerVersion =
           data.version.buildTimestamp > VERSION_INFO.buildTimestamp ||
-          data.version.gitHash !== VERSION_INFO.gitHash
-        );
-        
+          data.version.gitHash !== VERSION_INFO.gitHash;
+
         setUpdateAvailable(isNewerVersion);
-        
+
         // Store in storage for persistence
-        storage.setItem('lastVersionCheck', JSON.stringify({
-          timestamp: Date.now(),
-          latestVersion: data.version,
-          updateAvailable: isNewerVersion
-        }));
+        storage.setItem(
+          "lastVersionCheck",
+          JSON.stringify({
+            timestamp: Date.now(),
+            latestVersion: data.version,
+            updateAvailable: isNewerVersion,
+          })
+        );
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Version check failed');
-      console.error('Version check error:', err);
+      setError(err instanceof Error ? err.message : "Version check failed");
+      console.error("Version check error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -74,22 +76,22 @@ export function useVersionCheck(): VersionCheckResult {
 
   const applyUpdate = () => {
     // Clear cache and reload
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        registrations.forEach(registration => registration.unregister());
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
       });
     }
-    
+
     // Clear application cache
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => caches.delete(name));
+    if ("caches" in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => caches.delete(name));
       });
     }
-    
+
     // Clear storage (optional - keep user data)
-    storage.removeItem('lastVersionCheck');
-    
+    storage.removeItem("lastVersionCheck");
+
     // Force reload
     window.location.reload();
   };
@@ -98,16 +100,16 @@ export function useVersionCheck(): VersionCheckResult {
   useEffect(() => {
     // Check immediately
     checkForUpdates();
-    
+
     // Check every 30 minutes
     const interval = setInterval(checkForUpdates, 30 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   // Load from storage on mount
   useEffect(() => {
-    const savedCheck = storage.getItem('lastVersionCheck');
+    const savedCheck = storage.getItem("lastVersionCheck");
     if (savedCheck) {
       try {
         const parsed = JSON.parse(savedCheck);
@@ -117,7 +119,7 @@ export function useVersionCheck(): VersionCheckResult {
           setUpdateAvailable(parsed.updateAvailable);
         }
       } catch (e) {
-        console.error('Error loading cached version check:', e);
+        console.error("Error loading cached version check:", e);
       }
     }
   }, []);
@@ -129,6 +131,6 @@ export function useVersionCheck(): VersionCheckResult {
     isLoading,
     error,
     checkForUpdates,
-    applyUpdate
+    applyUpdate,
   };
-} 
+}
