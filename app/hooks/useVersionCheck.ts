@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { VERSION_INFO } from '../version';
+import { storage } from '../utils/storage';
 
 interface VersionInfo {
   version: string;
@@ -56,8 +57,8 @@ export function useVersionCheck(): VersionCheckResult {
         
         setUpdateAvailable(isNewerVersion);
         
-        // Store in localStorage for persistence
-        localStorage.setItem('lastVersionCheck', JSON.stringify({
+        // Store in storage for persistence
+        storage.setItem('lastVersionCheck', JSON.stringify({
           timestamp: Date.now(),
           latestVersion: data.version,
           updateAvailable: isNewerVersion
@@ -86,8 +87,8 @@ export function useVersionCheck(): VersionCheckResult {
       });
     }
     
-    // Clear localStorage (optional - keep user data)
-    localStorage.removeItem('lastVersionCheck');
+    // Clear storage (optional - keep user data)
+    storage.removeItem('lastVersionCheck');
     
     // Force reload
     window.location.reload();
@@ -104,9 +105,9 @@ export function useVersionCheck(): VersionCheckResult {
     return () => clearInterval(interval);
   }, []);
 
-  // Load from localStorage on mount
+  // Load from storage on mount
   useEffect(() => {
-    const savedCheck = localStorage.getItem('lastVersionCheck');
+    const savedCheck = storage.getItem('lastVersionCheck');
     if (savedCheck) {
       try {
         const parsed = JSON.parse(savedCheck);

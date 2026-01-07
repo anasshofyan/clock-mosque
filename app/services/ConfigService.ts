@@ -1,6 +1,7 @@
 'use client';
 
 import { MosqueData, KajianData } from '../types/config';
+import { storage } from '../utils/storage';
 
 export interface MosqueConfig {
   mosque: MosqueData;
@@ -35,7 +36,7 @@ class ConfigService {
       return;
     }
     
-    const isInitialized = localStorage.getItem(this.CONFIG_INITIALIZED_KEY);
+    const isInitialized = storage.getItem(this.CONFIG_INITIALIZED_KEY);
     if (!isInitialized) {
       try {
         // Menggunakan API endpoint untuk mendapatkan konfigurasi
@@ -44,10 +45,10 @@ class ConfigService {
           throw new Error('Failed to fetch config');
         }
         const config = await response.json();
-        
-        localStorage.setItem(this.MOSQUE_KEY, JSON.stringify(config.mosque));
-        localStorage.setItem(this.KAJIAN_KEY, JSON.stringify(config.settings.announcements));
-        localStorage.setItem(this.CONFIG_INITIALIZED_KEY, 'true');
+
+        storage.setItem(this.MOSQUE_KEY, JSON.stringify(config.mosque));
+        storage.setItem(this.KAJIAN_KEY, JSON.stringify(config.settings.announcements));
+        storage.setItem(this.CONFIG_INITIALIZED_KEY, 'true');
         
         console.log('Config initialized from API:', config);
         this.initialized = true;
@@ -65,9 +66,9 @@ class ConfigService {
             announcements: []
           }
         };
-        localStorage.setItem(this.MOSQUE_KEY, JSON.stringify(defaultConfig.mosque));
-        localStorage.setItem(this.KAJIAN_KEY, JSON.stringify(defaultConfig.settings.announcements));
-        localStorage.setItem(this.CONFIG_INITIALIZED_KEY, 'true');
+        storage.setItem(this.MOSQUE_KEY, JSON.stringify(defaultConfig.mosque));
+        storage.setItem(this.KAJIAN_KEY, JSON.stringify(defaultConfig.settings.announcements));
+        storage.setItem(this.CONFIG_INITIALIZED_KEY, 'true');
         this.initialized = true;
       }
     } else {
@@ -78,7 +79,10 @@ class ConfigService {
   public static async getInstance(): Promise<ConfigService> {
     if (!ConfigService.instance) {
       ConfigService.instance = new ConfigService();
-      await ConfigService.instance.initializeConfigIfNeeded();
+      // Hanya initialize jika di browser
+      if (typeof window !== 'undefined') {
+        await ConfigService.instance.initializeConfigIfNeeded();
+      }
     }
     return ConfigService.instance;
   }
@@ -115,8 +119,8 @@ class ConfigService {
       };
     }
     
-    const mosqueData = localStorage.getItem(this.MOSQUE_KEY);
-    const kajianList = localStorage.getItem(this.KAJIAN_KEY);
+    const mosqueData = storage.getItem(this.MOSQUE_KEY);
+    const kajianList = storage.getItem(this.KAJIAN_KEY);
 
     return {
       mosqueData: mosqueData ? JSON.parse(mosqueData) : null,
@@ -127,10 +131,12 @@ class ConfigService {
   public async saveMosqueInfo(data: MosqueData): Promise<void> {
     const config = await this.getConfig();
     config.mosque = data;
-    
-    // Simpan ke localStorage
-    localStorage.setItem(this.MOSQUE_KEY, JSON.stringify(data));
-    
+
+    // Simpan ke storage
+    if (typeof window !== 'undefined') {
+      storage.setItem(this.MOSQUE_KEY, JSON.stringify(data));
+    }
+
     // Simpan ke API/file JSON
     await this.saveConfigToAPI(config);
   }
@@ -142,33 +148,40 @@ class ConfigService {
       id: Date.now().toString(),
       isActive: true
     };
-    
+
     config.settings.announcements.push(newKajian);
-    
-    // Simpan ke localStorage
-    localStorage.setItem(this.KAJIAN_KEY, JSON.stringify(config.settings.announcements));
-    
+
+    // Simpan ke storage
+    if (typeof window !== 'undefined') {
+      storage.setItem(this.KAJIAN_KEY, JSON.stringify(config.settings.announcements));
+    }
+
     // Simpan ke API/file JSON
     await this.saveConfigToAPI(config);
   }
 
   public async toggleKajianStatus(id: string): Promise<void> {
     const config = await this.getConfig();
-    const updatedAnnouncements = config.settings.announcements.map(kajian => 
+    const updatedAnnouncements = config.settings.announcements.map(kajian =>
       kajian.id === id ? { ...kajian, isActive: !kajian.isActive } : kajian
     );
-    
+
     config.settings.announcements = updatedAnnouncements;
-    
-    // Simpan ke localStorage
-    localStorage.setItem(this.KAJIAN_KEY, JSON.stringify(updatedAnnouncements));
-    
+
+    // Simpan ke storage
+    if (typeof window !== 'undefined') {
+      storage.setItem(this.KAJIAN_KEY, JSON.stringify(updatedAnnouncements));
+    }
+
     // Simpan ke API/file JSON
     await this.saveConfigToAPI(config);
   }
 
   private async getKajianList(): Promise<KajianData[]> {
-    const kajianList = localStorage.getItem(this.KAJIAN_KEY);
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    const kajianList = storage.getItem(this.KAJIAN_KEY);
     return kajianList ? JSON.parse(kajianList) : [];
   }
 
@@ -243,6 +256,6 @@ class ConfigService {
   }
 }
 
-const configService = ConfigService.getInstance();
-export { configService };
-export default configService; 
+// Export getInstance method instead of instance
+export const getConfigService = () => ConfigService.getInstance();
+export default getConfigService; 

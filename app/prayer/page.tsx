@@ -3,6 +3,7 @@
 import PrayerDisplay from '../components/PrayerDisplay';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { storage } from '../utils/storage';
 
 interface PrayerInfo {
   name: string;
@@ -31,9 +32,9 @@ export default function PrayerPage() {
           const prayer = JSON.parse(storedPrayer);
           setPrayerInfo(prev => ({ ...prev, ...prayer }));
         } else {
-          // Jika tidak ada di sessionStorage, coba cek di localStorage
+          // Jika tidak ada di sessionStorage, coba cek di storage
           // sebagai fallback untuk kasus refresh halaman
-          const lastTriggered = localStorage.getItem('lastTriggeredPrayer');
+          const lastTriggered = storage.getItem('lastTriggeredPrayer');
           
           if (lastTriggered) {
             const parsed = JSON.parse(lastTriggered);
@@ -76,7 +77,7 @@ export default function PrayerPage() {
         if (mounted && typeof window !== 'undefined') {
           sessionStorage.removeItem('currentPrayer');
           
-          // Kita tidak menghapus localStorage karena kita ingin
+          // Kita tidak menghapus storage karena kita ingin
           // melacak waktu shalat yang terakhir dipicu untuk mencegah pemicu ganda
         }
       } catch (error) {
@@ -89,7 +90,7 @@ export default function PrayerPage() {
   const handleIqomahComplete = () => {
     if (typeof window !== 'undefined') {
       // Hapus status "baru dipicu" untuk memungkinkan adzan berikutnya
-      localStorage.removeItem('lastTriggeredPrayer');
+      storage.removeItem('lastTriggeredPrayer');
     }
   };
 

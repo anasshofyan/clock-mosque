@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { configService } from './services/ConfigService';
+import { getConfigService } from './services/ConfigService';
 import { PrayerTimeService } from './services/PrayerTimeService';
 import { useKajian } from './hooks/useKajian';
 import Countdown from './components/Countdown';
 import Clock from './components/Clock';
 import Image from 'next/image';
 import { useRef } from 'react';
+import { storage } from './utils/storage';
 
 interface PrayerTime {
   name: string;
@@ -66,9 +67,9 @@ export default function Home() {
   // Handle prayer time check and navigation
   const handlePrayerTime = (matchingPrayer: PrayerTime): void => {
     try {
-      // Simpan status ke localStorage untuk persistensi jika tab ditutup/refresh
+      // Simpan status ke storage untuk persistensi jika tab ditutup/refresh
       if (typeof window !== 'undefined') {
-        localStorage.setItem('lastTriggeredPrayer', JSON.stringify({
+        storage.setItem('lastTriggeredPrayer', JSON.stringify({
           name: matchingPrayer.name,
           time: matchingPrayer.time,
           timestamp: new Date().getTime()
@@ -115,7 +116,7 @@ export default function Home() {
     
     // Cek apakah ada waktu shalat yang baru saja terlewat saat refresh/buka app
     if (typeof window !== 'undefined') {
-      const lastTriggered = localStorage.getItem('lastTriggeredPrayer');
+      const lastTriggered = storage.getItem('lastTriggeredPrayer');
       if (lastTriggered) {
         try {
           const parsed = JSON.parse(lastTriggered);
@@ -144,11 +145,11 @@ export default function Home() {
   useEffect(() => {
     const loadMosqueData = async () => {
       try {
-        const config = await configService;
+        const config = await getConfigService();
         const configData = await config.getConfig();
         
-        // Simpan konfigurasi ke localStorage
-        localStorage.setItem('mosque_config', JSON.stringify(configData));
+        // Simpan konfigurasi ke storage
+        storage.setItem('mosque_config', JSON.stringify(configData));
         
         const prayerService = PrayerTimeService.getInstance();
         const cityData = await prayerService.getCityById(configData.mosque.cityCode);

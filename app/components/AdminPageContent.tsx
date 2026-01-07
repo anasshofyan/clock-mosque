@@ -12,6 +12,7 @@ import { useVersionCheck } from '../hooks/useVersionCheck';
 import { PrayerTimeService } from '../services/PrayerTimeService';
 import { MosqueData, KajianData } from '../types/config';
 import { useRouter } from 'next/navigation';
+import { storage } from '../utils/storage';
 
 interface City {
   id: string;
@@ -131,7 +132,7 @@ export default function AdminPageContent() {
   useEffect(() => {
     const loadStaffData = async () => {
       try {
-        const staffData = localStorage.getItem('mosque_staff');
+        const staffData = storage.getItem('mosque_staff');
         if (staffData) {
           setStaffForm(JSON.parse(staffData));
         }
@@ -243,7 +244,7 @@ export default function AdminPageContent() {
   const handleStaffSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      localStorage.setItem('mosque_staff', JSON.stringify(staffForm));
+      storage.setItem('mosque_staff', JSON.stringify(staffForm));
       // Reload halaman untuk memperbarui tampilan
       window.location.reload();
     } catch (error) {
@@ -859,7 +860,7 @@ export default function AdminPageContent() {
                       variant="outline"
                       onClick={() => {
                         if (confirm('Clear cache akan menghapus semua data tersimpan sementara. Lanjutkan?')) {
-                          localStorage.clear();
+                          storage.clear();
                           sessionStorage.clear();
                           window.location.reload();
                         }

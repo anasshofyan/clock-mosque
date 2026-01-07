@@ -1,6 +1,10 @@
+'use client';
+
 // PrayerTimeService.ts
 // Service untuk menangani waktu shalat dari MyQuran API v2
 // Dokumentasi: https://documenter.getpostman.com/view/841292/2s9YsGittd
+
+import { storage } from '../utils/storage';
 
 export interface City {
   id: string;
@@ -62,16 +66,18 @@ export class PrayerTimeService {
   };
 
   private constructor() {
-    // Load konfigurasi kota dari localStorage jika ada
-    const config = localStorage.getItem('mosque_config');
-    if (config) {
-      try {
-        const mosqueConfig = JSON.parse(config);
-        if (mosqueConfig.mosque && mosqueConfig.mosque.cityCode) {
-          this.cityId = mosqueConfig.mosque.cityCode;
+    // Load konfigurasi kota dari storage jika ada
+    if (typeof window !== 'undefined') {
+      const config = storage.getItem('mosque_config');
+      if (config) {
+        try {
+          const mosqueConfig = JSON.parse(config);
+          if (mosqueConfig.mosque && mosqueConfig.mosque.cityCode) {
+            this.cityId = mosqueConfig.mosque.cityCode;
+          }
+        } catch (error) {
+          console.error('Error parsing mosque config:', error);
         }
-      } catch (error) {
-        console.error('Error parsing mosque config:', error);
       }
     }
   }
@@ -257,7 +263,7 @@ export class PrayerTimeService {
     } catch (error) {
       console.error('Error fetching prayer times:', error);
       
-      // Fallback ke data yang tersimpan di localStorage
+      // Fallback ke data yang tersimpan di storage
       this.loadFromLocalStorage();
       
       // Jika masih tidak ada data, gunakan fallback default
@@ -285,32 +291,34 @@ export class PrayerTimeService {
   }
 
   private saveToLocalStorage(): void {
+    if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem('prayerTimesData', JSON.stringify({
+      storage.setItem('prayerTimesData', JSON.stringify({
         times: this.prayerTimes,
         monthlyTimes: this.monthlyPrayerTimes,
         cityId: this.cityId,
         lastUpdated: this.lastUpdated?.toISOString()
       }));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('Error saving to storage:', error);
     }
   }
 
   private loadFromLocalStorage(): void {
+    if (typeof window === 'undefined') return;
     try {
-      const savedData = localStorage.getItem('prayerTimesData');
+      const savedData = storage.getItem('prayerTimesData');
       if (savedData) {
         const data = JSON.parse(savedData);
         this.prayerTimes = data.times || [];
         this.monthlyPrayerTimes = data.monthlyTimes || [];
         this.cityId = data.cityId;
         this.lastUpdated = data.lastUpdated ? new Date(data.lastUpdated) : null;
-        console.log('Prayer times loaded from localStorage:', this.prayerTimes);
+        console.log('Prayer times loaded from storage:', this.prayerTimes);
         console.log('Monthly prayer times loaded:', this.monthlyPrayerTimes.length, 'days');
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      console.error('Error loading from storage:', error);
     }
   }
 
