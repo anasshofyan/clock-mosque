@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { VERSION_INFO } from "../version";
+
 import { storage } from "../utils/storage";
 
 interface VersionInfo {
